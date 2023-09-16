@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import os, sys
 from typing import Dict
 from azure.storage.blob import BlockBlobService
+from azure.storage.blob import PublicAccess
+from azure.storage.blob import ContentSettings
 
 
 class FeatureStoreConnector(ABC): 

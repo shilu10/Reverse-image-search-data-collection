@@ -11,7 +11,7 @@ mongodb_client_creator = MongoDBConnector()
 mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
 
 # storage account client
-blob_storage_client_creator = AzureStorageConnector(acc_name='training_data')
+blob_storage_client_creator = AzureStorageConnector(acc_name='tfstate686')
 blob_storage_client = blob_storage_client_creator.connect()
 
 # azurecontainer creator and blob creator
@@ -73,6 +73,31 @@ def add_label(label_name: str):
 
     except Exception as err:
         return err 
+
+
+# upload single image 
+@app.get("/single_upload/")
+def single_upload():
+    info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]}
+    return JSONResponse(content=info, status_code=200, media_type="application/json")
+
+
+# Image Single Upload Api
+@app.post("/single_upload/")
+async def single_upload(label: str, file: UploadFile = None):
+    label = choices.get(label, False)
+    if file.content_type == "image/jpeg" and label != False:
+        response = blob_creator.upload(
+            container_name=label,
+            file_path=file,
+            blob_name='first.jpeg'
+        )
+        return {"filename": file.filename, "label": label, "container-Response": response}
+    else:
+        return {
+            "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
+            "LabelFound": label,
+        }
 
 
 if __name__ == '__main__':
