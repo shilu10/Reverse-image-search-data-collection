@@ -91,14 +91,19 @@ async def single_upload(label: str, file: UploadFile = None):
 
         class_names = [document.get('class_name') for document in documents]
         is_label_present = label in class_names
+        contents = file.file.read() 
+        with open('image.jpeg', 'wb') as f:
+            f.write(contents)
 
         if file.content_type == "image/jpeg" and is_label_present:
+            print(file.file)
             response = blob_creator.upload(
                 container_name=label,
-                file_path=file,
-                blob_name='first.jpeg'
+                file_path='image.jpeg',
+                blob_name=file.filename
             )
             return {"filename": file.filename, "label": label, "container-Response": response}
+        
         else:
             return {
                 "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
