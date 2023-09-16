@@ -2,13 +2,13 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from typing import List, Union, Any
 import uvicorn
-from src.connectors.database import DataBaseConnector
+from src.connectors.database import MongoDBConnector
 from src.connectors.feature_store import AzureBlobCreator, AzureContainerCreator, AzureStorageConnector
 
 
 # creation of mongodb client
 mongodb_client_creator = MongoDBConnector()
-mongodb_client = mongodb_client_creator.create_connector(db_name='training_data')
+mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
 
 # storage account client
 blob_storage_client_creator = AzureStorageConnector(acc_name='training_data')
@@ -26,14 +26,16 @@ app = FastAPI(title="DataCollection-Server")
 @app.get("/labels")
 def fetch_label():
     try:
-        result = mongodb_client['labels'].find()
-        documents = [document.get('class_name') for document in result]
+        collections = mongodb_client['labels']
+        results = collections.find()
+        documents = [document.get('class_name') for document in results]
 
         response = {"Status": "Success", "Response": {'labels': documents}}
         return JSONResponse(content=response, status_code=200, media_type="application/json")
 
     except Exception as e:
         raise e
+
 
 # adding new labels
 @app.post("/add_label/{label_name}")
@@ -60,6 +62,11 @@ def add_label(label_name: str):
             }
 
             collections.insert_one(new_label_data)
+
+            # create a container named label_name
+            container_response = container_creator.create(container_name=label_name, 
+                                                        is_public=True)
+            print(container_response)
 
         response = {"Status": "Success"}
         return JSONResponse(content=response, status_code=200, media_type="application/json")
