@@ -32,26 +32,6 @@ class UploadData(ABC):
 		pass 
 
 
-class S3Connector(FeatureStoreConnector):
-	def __init__(self, bucket_name):
-		self.bucket_name = bucket_name 
-
-	def connect(self):
-		try:
-			session = boto3.Session(
-	            aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-	            aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-	        )
-
-	        s3_client = session.resource("s3") 
-	        bucket_client = s3_client.Bucket(bucket_name)
-
-	        return bucket_client
-
-	    except Exception as err:
-	    	return err 
-
-
 class AzureStorageConnector(FeatureStoreConnector):
 	def __init__(self, acc_name):
 		self.acc_name = acc_name
@@ -68,14 +48,13 @@ class AzureStorageConnector(FeatureStoreConnector):
 
 
 class AzureContainerCreator(CreateDirectory):
-	def __init__(self, blob_client, is_public):
-		self.__az_blob_client = az_blob_client
-		self.__is_public = is_public 
+	def __init__(self, blob_client):
+		self.__blob_client = blob_client
 
-	def create(self, container_name):
+	def create(self, container_name, is_public):
 		try: 
 		 	creation_response = self.__blob_client.create_container(container_name)
-		 	if self.__is_public and creation_response:
+		 	if is_public and creation_response:
 		 		self.__blob_client.set_container_acl(container_name, 
 		 											public_access=PublicAccess.Container)
 
@@ -86,11 +65,10 @@ class AzureContainerCreator(CreateDirectory):
 
 
 class AzureBlobCreator(UploadData):
-	def __init__(self, blob_client, container, image_path):
+	def __init__(self, blob_client):
 		self.__blob_client = blob_client
-		self.container = container
 
-	def upload(self, image_path):
+	def upload(self, container, image_path):
 		try:
 			self.__blob_client.create_blob_from_path(
 						container_name = container,
