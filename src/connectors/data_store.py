@@ -8,7 +8,7 @@ from azure.storage.fileshare import ShareClient
 from io import BufferedReader
 
 
-class FeatureStoreConnector(ABC): 
+class DataStoreConnector(ABC): 
 	def __init__(self):
 		pass 
 
@@ -35,7 +35,7 @@ class UploadData(ABC):
 		pass 
 
 
-class AzureStorageConnector(FeatureStoreConnector):
+class AzureStorageConnector(DataStoreConnector):
 	"""
 	this class, is used to create a block blob storage connector, which 
 	allow us to create container and create blob.
@@ -132,7 +132,7 @@ class AzureBlobCreator(UploadData):
 
 
 ### creating nfs share for storing training_data.
-class AzureFileShareConnector(FeatureStoreConnector):
+class AzureFileShareConnector(DataStoreConnector):
 	"""
 	this class, is used to create a connector to the nfs(azure file share), 
 	so, this connection string, can be used by other classes.
