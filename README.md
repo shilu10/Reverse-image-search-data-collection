@@ -15,3 +15,16 @@
 	AZ_ACCOUNT_KEY
 
 
+sas_token = generate_account_sas(
+    account_name="tfstate686",
+    account_key=" QxedQzl2GHeH57C5rPtuECF8ROHSU4QUeVrdHOBUEJnf/D9yuX11cwjNSJg2+FJ+5lBIEc11QxvZ+ASt/IqVTQ==",
+    resource_types=ResourceTypes(service=True),
+    permission=AccountSasPermissions(read=True),
+    expiry=datetime.utcnow() + timedelta(hours=1)
+)
+
+
+### to get a connection string, used by the share_client
+az storage account show-connection-string -g tfstate -n tfstate686
+
+share = ShareClient.from_connection_string(conn_str=conn_str, share_name="myshare")
