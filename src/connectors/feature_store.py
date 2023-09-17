@@ -4,6 +4,8 @@ from typing import Dict
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob import PublicAccess
 from azure.storage.blob import ContentSettings
+from azure.storage.fileshare import ShareClient
+from io import BufferedReader
 
 
 class FeatureStoreConnector(ABC): 
@@ -127,3 +129,99 @@ class AzureBlobCreator(UploadData):
 
 		except Exception as err:
 			return err 
+
+
+### creating nfs share for storing training_data.
+class AzureFileShareConnector(FeatureStoreConnector):
+	"""
+	this class, is used to create a connector to the nfs(azure file share), 
+	so, this connection string, can be used by other classes.
+	methods;
+		connect(public): which creates stroage connector, to specified storage 
+		account.
+	attrs:
+		acc_name(dtype: str): To which storage account, needed to be connected.
+	"""
+	def __init__(self):
+		pass 
+
+	def connect(self, share_name: str)->ShareClient:
+		try:
+			connection_string = os.environ['AZ_CONNECTION_STRING']
+			share = ShareClient.from_connection_string(connection_string, share_name)
+
+			return share 
+
+		except Exception as err:
+			print(err) 
+
+
+class AzureFileShareDirectoryCreator(CreateDirectory):
+	"""
+	this call, is used to create a directory in the azurefileshare(nfs),
+	so, it can be used to create a directory
+	methods:
+		create(public): this methods, will creates the directory
+	attrs:
+		share_client(type; BlockBlobService): client created from 
+													ShareClient.
+	"""
+	def __init__(self, share_client):
+		self.__share_client = share_client
+
+	def create(self, directory_name: str)->Dict:
+		"""
+		this method, will create the directory in the specific share in storage
+		account, which is provided throught the share_client.
+		Params:
+			directory_name(dtype: str): name of the container needed to be
+											created.
+		Return(dtype: dict):
+			ir returns the dictonary of the response from the azure,
+		"""
+		try:
+			# create root direc(reverse_image_search_data)
+			creation_response = self.__share_client.create_directory(f"reverse_image_search_data/train/{directory_name}")
+
+			return {'container_creation_response': creation_response} 
+
+		except Exception as err:
+			print(err) 
+
+
+class AzureFileShareFileUploader(UploadData):
+	"""
+		this class, is used to create a file in specific directory path in 
+		the azure file share.
+		methods:
+			upload(public): this method, will upload the data to file.
+		attrs;
+			share_client(type; BlockBlobService): client created from 
+													ShareClient.
+	"""
+	def __init__(self, share_client):
+		self.__share_client = share_client
+
+	def upload(self, directory_name: str, 
+				file_content: BufferedReader, dst_file_name: str)->Dict:
+		"""
+		this method, will upload the file from local node to the 
+		destinated container as a fileshare directory.
+		params;
+			directory_name(dtype: str): container to where, the blob will be
+											created.
+			file_path(dtype: str): local path, where the file is located
+			dst_file_name(dtype: str): name for the blob, that will be created.
+		"""
+		try:
+			parent_dir = "reverse_image_search_data/train/{directory_name}/"
+			dir_client = self.__share_client.get_directory_client(parent_dir)
+
+			#file_client = self.__share_client.get_file_client(f"{parent_dir}/{directory_name}/{dst_file_name}")
+			res = dir_client.upload_file(data=file_content, file_name=dst_file_name)
+
+			return {'response': True}
+
+		except Exception as err:
+			print(err)
+
