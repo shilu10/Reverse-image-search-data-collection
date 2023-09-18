@@ -214,7 +214,7 @@ class AzureFileShareFileUploader(UploadData):
 			dst_file_name(dtype: str): name for the blob, that will be created.
 		"""
 		try:
-			parent_dir = "reverse_image_search_data/train/{directory_name}"
+			parent_dir = f"reverse_image_search_data/train/{directory_name}"
 			print(parent_dir, "parent_dir")
 			dir_client = self.__share_client.get_directory_client(parent_dir)
 			print(dir_client)
