@@ -1,7 +1,8 @@
 import os, sys 
+sys.paths.append('..')
 from abc import abstractmethod, ABC
-from ..exceptions.metastore import CustomException
-from ..connectors.metastore import MongoDBConnector
+from exceptions.metastore import CustomException
+from connectors.metastore import MongoDBConnector
 
 
 class MetaDataStore(ABC):
@@ -40,8 +41,11 @@ class MongoDBMetaDataStore(MetaDataStore):
                 raise CustomException('No file or directory, is found in the path, try to run datastore_setup.py first', '') 
             
             all_dirs = os.listdir(self.data_path)
+            print(all_dirs)
             collections = self.__mongo_client['labels']
+            prin(collection)
             results = collections.find()
+            print(results)
             if len(documents) > 0:
                 documents = [doc.get('class_id') for doc in results]
                 if 0 in documents:
