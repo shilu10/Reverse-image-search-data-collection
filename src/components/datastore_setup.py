@@ -15,30 +15,24 @@ class DataStore(ABC):
         pass 
 
     @abstractmethod
-    def __download_data(self):
+    def _download_data(self):
         pass 
 
     @abstractmethod
-    def __extract_initial_data(self):
+    def _extract_initial_data(self):
         pass 
 
     @abstractmethod
-    def __prepare_initial_data(self):
+    def _prepare_initial_data(self):
         pass 
 
     @abstractmethod
-    def __sync_initial_data(self):
+    def _sync_initial_data(self):
         pass 
 
+    @abstractmethod
     def run(self):
-        try:
-            self.__download_data()
-            self.__extract_initial_data()
-            self.__prepare_initial_data()
-            self.__sync_initial_data()
-        
-        except Exception as err:
-            return err 
+        pass 
 
 
 class AzureFileShareDataStore(DataStore):
@@ -63,7 +57,7 @@ class AzureFileShareDataStore(DataStore):
         self.avoid = ["BACKGROUND_Google"]
         self.data_path = self.extraction_path + '/caltech-101/'
 
-    def __download_data(self):
+    def _download_data(self):
         """
         this method, will download the data from kaggle, and extract it into 
         the extraction path.
@@ -78,44 +72,70 @@ class AzureFileShareDataStore(DataStore):
             print("[+] Completed downloading the dataset")
 
         except Exception as err:
-            return err 
+            print(err)
+            return 
 
-    def __extract_initial_data(self):
+    def _extract_initial_data(self):
         """
         this method, will extract the initial data, using gzip and tar.
         """
         try:
             print("[+] started extracting the dataset") 
-            os.system("unzip caltech-101.zip")
+            if not os.path.exists(f'{self.extraction_path}/caltech-101'):
+                os.system(f"cd {self.extraction_path} && unzip -q caltech-101.zip")
             print("[+] extraction of the dataset completed.")
 
         except Exception as err:
-            return err 
+            print(err) 
+            return
 
-    def __prepare_initial_data(self):
+    def _prepare_initial_data(self):
         """
         this method, used to prepare the data for the data_store, like removing the 
         unwanted classes, etc.
         """
         try:
+            print('[+]Started preparing the dataset.')
             classes = os.listdir(self.data_path)
             for _class in classes:
                 if _class in self.avoid:
-                    dir_path = self.data_path + '/_class'
+                    dir_path = self.data_path + f'{_class}'
                     shutil.rmtree(dir_path)
+
+            print('[+]Completed the preparation of the dataset')
         
         except Exception as err:
-            return err 
+            print(err)
+            return 
         
-    def __sync_initial_data(self):
+    def _sync_initial_data(self):
         """
         this method, used to sync the data from local storage to the data_store
         (file_share azure).
         """
         try:
             print('[+] Started the data sync') 
-            os.system(F"azcopy copy 'caltech-101' {os.environ['AZCOPY_URL']} --recursive")
+            command = f"azcopy copy '{self.data_path}/*' '{os.environ['AZCOPY_URL']}' --recursive"
+            print(command)
+            os.system(command)
             print('[+] Completed the data sync to datastore')
         
         except Exception as err:
-            return err 
+            print(err)
+            return 
+
+    def run(self):
+        try:
+            self._download_data()
+            self._extract_initial_data()
+            self._prepare_initial_data()
+            self._sync_initial_data()
+        
+        except Exception as err:
+            print(err)
+            return 
+
+
+if __name__ == '__main__':
+    ds = AzureFileShareDataStore()
+    ds.run()
