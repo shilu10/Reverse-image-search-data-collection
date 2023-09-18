@@ -45,11 +45,11 @@ class MongoDBMetaDataStore(MetaDataStore):
             collections = self.__mongo_client['labels']
             print(collections)
             results = collections.find()
-            documents = [document for document in documents]
+            documents = [document for document in results]
             print(results)
             if len(documents) > 0:
                 documents = [doc.get('class_id') for doc in results]
-                if 0 in documents:
+                if 1 in documents:
                     raise CustomException('Labels already present in the metadata store', '')
 
             else:

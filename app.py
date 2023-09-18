@@ -11,12 +11,16 @@ mongodb_client_creator = MongoDBConnector()
 mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
 
 # storage account client
-blob_storage_client_creator = AzureStorageConnector(acc_name='tfstate686')
-blob_storage_client = blob_storage_client_creator.connect()
+#blob_storage_client_creator = AzureStorageConnector(acc_name='tfstate686')
+#blob_storage_client = blob_storage_client_creator.connect()
+
+# file share client
+file_share_client_creator = AzureFileShareConnector()
+file_share_client = file_share_client_creator.connect('myshare')
 
 # azurecontainer creator and blob creator
-container_creator = AzureContainerCreator(blob_storage_client)
-blob_creator = AzureBlobCreator(blob_storage_client)
+directory_creator = AzureFileShareDirectoryCreator(file_share_client)
+file_uploader = AzureFileShareFileUploader(file_share_client)
 
 ## instantitaing fastapi 
 app = FastAPI(title="DataCollection-Server")
@@ -63,8 +67,7 @@ def add_label(label_name: str):
             collections.insert_one(new_label_data)
 
             # create a container named label_name
-            container_response = container_creator.create(container_name=label_name, 
-                                                        is_public=True)
+            container_response = directory_creator.create(directory_name=label_name)
             print(container_response)
 
         response = {"Status": "Success"}
@@ -91,17 +94,15 @@ async def single_upload(label: str, file: UploadFile = None):
 
         class_names = [document.get('class_name') for document in documents]
         is_label_present = label in class_names
-        contents = file.file.read() 
-        
-        with open('image.jpeg', 'wb') as f:
-            f.write(contents)
+        file_contents = file.file.read() 
+        #file_contents = open('image.jpeg', 'wb')
 
         if file.content_type == "image/jpeg" and is_label_present:
             print(file.file)
-            response = blob_creator.upload(
-                container_name=label,
-                file_path='image.jpeg',
-                blob_name=file.filename
+            response = file_uploader.upload(
+                directory_name=label,
+                file_content=file_contents,
+                dst_file_name=file.filename
             )
             return {"filename": file.filename, "label": label, "container-Response": response}
         else:
