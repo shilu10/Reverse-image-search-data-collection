@@ -6,17 +6,12 @@ def error_message_detail(error, error_detail):
     )
 
     return error_message
-    
+
 
 class CustomException(Exception):
-    def __init__(self, error_message, error_detail):
-        """
-        :param error_message: error message in string format
-        """
-        super().__init__(error_message)
-        self.error_message = error_message_detail(
-            error_message, error_detail=error_detail
-        )
-
+    """Still an exception raised when uncommon things happen"""
+    def __init__(self, message, payload=None):
+        self.message = message
+        self.payload = payload # you could add more args
     def __str__(self):
-        return self.error_message
+        return str(self.message) # __str__() obviously expects a string to be returned, so make sure not to send any other data types

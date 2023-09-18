@@ -1,5 +1,5 @@
 import os, sys 
-sys.paths.append('..')
+sys.path.append('..')
 from abc import abstractmethod, ABC
 from exceptions.metastore import CustomException
 from connectors.metastore import MongoDBConnector
@@ -28,7 +28,7 @@ class MongoDBMetaDataStore(MetaDataStore):
     """
     def __init__(self, mongo_client):
         self.__mongo_client = mongo_client
-        self.data_path = 'reverse_image_search_data/caltech-101/'
+        self.data_path = 'reverse_image_search_initial_data/caltech-101/'
     
     def register_labels(self):
         """
@@ -43,8 +43,9 @@ class MongoDBMetaDataStore(MetaDataStore):
             all_dirs = os.listdir(self.data_path)
             print(all_dirs)
             collections = self.__mongo_client['labels']
-            prin(collection)
+            print(collections)
             results = collections.find()
+            documents = [document for document in documents]
             print(results)
             if len(documents) > 0:
                 documents = [doc.get('class_id') for doc in results]
