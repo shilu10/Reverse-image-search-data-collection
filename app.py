@@ -2,8 +2,9 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from typing import List, Union, Any
 import uvicorn
-from src.connectors.database import MongoDBConnector
-from src.connectors.feature_store import AzureBlobCreator, AzureContainerCreator, AzureStorageConnector
+from src.connectors.metastore import MongoDBConnector
+from src.connectors.datastore import AzureBlobCreator, AzureContainerCreator, AzureStorageConnector, \
+                             AzureFileShareConnector, AzureFileShareDirectoryCreator, AzureFileShareFileUploader
 
 
 # creation of mongodb client
