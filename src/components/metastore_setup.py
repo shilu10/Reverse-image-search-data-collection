@@ -41,12 +41,9 @@ class MongoDBMetaDataStore(MetaDataStore):
                 raise CustomException('No file or directory, is found in the path, try to run datastore_setup.py first', '') 
             
             all_dirs = os.listdir(self.data_path)
-            print(all_dirs)
             collections = self.__mongo_client['labels']
-            print(collections)
             results = collections.find()
             documents = [document for document in results]
-            print(results)
             if len(documents) > 0:
                 documents = [doc.get('class_id') for doc in results]
                 if 1 in documents:

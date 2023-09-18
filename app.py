@@ -7,6 +7,7 @@ from src.connectors.datastore import AzureBlobCreator, AzureContainerCreator, Az
                              AzureFileShareConnector, AzureFileShareDirectoryCreator, AzureFileShareFileUploader
 
 
+
 # creation of mongodb client
 mongodb_client_creator = MongoDBConnector()
 mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
@@ -99,13 +100,13 @@ async def single_upload(label: str, file: UploadFile = None):
         #file_contents = open('image.jpeg', 'wb')
 
         if file.content_type == "image/jpeg" and is_label_present:
-            print(file.file)
             response = file_uploader.upload(
                 directory_name=label,
                 file_content=file_contents,
                 dst_file_name=file.filename
             )
             return {"filename": file.filename, "label": label, "container-Response": response}
+        
         else:
             return {
                 "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
@@ -113,8 +114,57 @@ async def single_upload(label: str, file: UploadFile = None):
             }
 
     except Exception as err:
-        return err 
+         return {"ContentType": f"Content type should be Image/jpeg not {e}"}
 
+
+@app.get("/bulk_upload")
+def bulk_upload():
+    info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]}
+    return JSONResponse(content=info, status_code=200, media_type="application/json")
+
+
+@app.post("/bulk_upload/")
+def bulk_upload(label: str, files: UploadFile = List[UploadFile] = File(...)):
+    skipped = []
+    uploaded = []
+    try:
+       collections = mongodb_client['labels']
+        results = collections.find()
+        documents = [document for document in results]
+
+        class_names = [document.get('class_name') for document in documents]
+        is_label_present = label in class_names
+
+        if label:
+            for file in files:
+                file_contents = file.file.read() 
+                if file.content_type == "image/jpeg":
+                    response = file_uploader.upload(
+                        directory_name=label,
+                        file_content=file_contents,
+                        dst_file_name=file.filename
+                    )
+
+                    uploaded.append(file.filename)
+
+                else:
+                    skipped.append(file.filename)
+
+            info = {"Response": "Success", 
+                    "Uploaded_files": uploaded,
+                    "Skipped_files": skipped
+                }
+
+            return JSONResponse(content=info, status_code=200, media_type="application/json")
+
+        else:
+            return {
+                "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
+                "LabelFound": label,
+            }
+
+    except Exception as err:
+         return {"ContentType": f"Content type should be Image/jpeg not {e}"}
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8080)
