@@ -191,12 +191,12 @@ class AzureFileShareDirectoryCreator(CreateDirectory):
 
 class AzureFileShareFileUploader(UploadData):
 	"""
-		this class, is used to create a file in specific directory path in 
-		the azure file share.
-		methods:
-			upload(public): this method, will upload the data to file.
-		attrs;
-			share_client(type; BlockBlobService): client created from 
+	this class, is used to create a file in specific directory path in 
+	the azure file share.
+	methods:
+		upload(public): this method, will upload the data to file.
+	attrs;
+		share_client(type; BlockBlobService): client created from 
 													ShareClient.
 	"""
 	def __init__(self, share_client):
@@ -214,7 +214,8 @@ class AzureFileShareFileUploader(UploadData):
 			dst_file_name(dtype: str): name for the blob, that will be created.
 		"""
 		try:
-			parent_dir = f"reverse_image_search_data/train/{directory_name}"
+			parent_dir = f"reverse_image_search_data/dummy/{directory_name}"
+			print(parent_dir)
 			dir_client = self.__share_client.get_directory_client(parent_dir)
 
 			#file_client = self.__share_client.get_file_client(f"{parent_dir}/{directory_name}/{dst_file_name}")

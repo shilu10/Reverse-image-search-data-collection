@@ -24,6 +24,10 @@ class DataBaseConnector(ABC):
 
 # mongodb connector.
 class MongoDBConnector(DataBaseConnector):
+    """
+    this class, used to connect to the mongodb database with the specified cluster, 
+    and to the mongofb  
+    """
     def __init__(self):
         pass 
 
