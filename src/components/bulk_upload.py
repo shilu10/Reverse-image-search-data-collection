@@ -11,6 +11,7 @@ from azure.storage.fileshare import ShareClient
 from io import BufferedReader
 import shutil
 import glob 
+from tqdm import tqdm
 
 
 class BulkUpload: 
@@ -95,7 +96,7 @@ class BulkUpload:
         print('[+]Started uploading the data to datastore.')
         all_dirs = os.listdir(self.data_path)
         
-        for indx, dir in enumerate(all_dirs):
+        for indx, dir in tqdm(enumerate(all_dirs), total=len(all_dirs)):
             try:
                 dir_path = os.path.join(self.data_path, dir)
                 self.fileshare_directory_creator.create(dir)

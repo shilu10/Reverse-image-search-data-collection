@@ -214,8 +214,7 @@ class AzureFileShareFileUploader(UploadData):
 			dst_file_name(dtype: str): name for the blob, that will be created.
 		"""
 		try:
-			parent_dir = f"reverse_image_search_data/dummy/{directory_name}"
-			print(parent_dir)
+			parent_dir = f"reverse_image_search_data/train/{directory_name}"
 			dir_client = self.__share_client.get_directory_client(parent_dir)
 
 			#file_client = self.__share_client.get_file_client(f"{parent_dir}/{directory_name}/{dst_file_name}")
@@ -226,3 +225,5 @@ class AzureFileShareFileUploader(UploadData):
 		except Exception as err:
 			print(err)
 
+reverse_image_search_data
+dummy

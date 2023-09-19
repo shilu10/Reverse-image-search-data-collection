@@ -70,7 +70,6 @@ def add_label(label_name: str):
 
             # create a container named label_name
             container_response = directory_creator.create(directory_name=label_name)
-            print(container_response)
 
         response = {"Status": "Success"}
         return JSONResponse(content=response, status_code=200, media_type="application/json")
@@ -165,6 +164,7 @@ def bulk_upload(label: str, files: List[UploadFile] = File(...)):
 
     except Exception as err:
          return {"ContentType": f"Content type should be Image/jpeg not {e}"}
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8080)
