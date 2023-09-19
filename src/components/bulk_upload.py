@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import os, sys
 sys.path.append('..')
 from connectors.datastore import *
-from exception.metastore import *
+from exceptionS.metastore import *
 from typing import Dict
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob import PublicAccess
@@ -16,7 +16,7 @@ import glob
 class BulkUpload: 
     def __init__(self):
         fileshare_conn_creator = AzureFileShareConnector()
-        self.fileshare_connector = fileshare_conn_creator.connect('myshare')
+        fileshare_connector = fileshare_conn_creator.connect('myshare')
 
         ## directory creator and fileuploader
         self.fileshare_directory_creator = AzureFileShareDirectoryCreator(fileshare_connector)
@@ -26,6 +26,7 @@ class BulkUpload:
         self.dataset_name = "imbikramsaha/caltech-101" 
         self.avoid = ["BACKGROUND_Google"]
         self.data_path = self.extraction_path + '/caltech-101/'
+        self.fileshare_connector = fileshare_connector
 
     def _download_data(self):
         """
@@ -104,7 +105,7 @@ class BulkUpload:
                         print(f'{file} is skipped')
             
             except Exception as err:
-                print(f'{dir} is skipped')ist_dir = os.listdir(self.data_path)
+                print(f'{dir} is skipped')
 
         print('[+]Completed the uploading of data to datastore')
 
