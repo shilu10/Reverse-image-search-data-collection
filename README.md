@@ -42,3 +42,12 @@ share = ShareClient.from_connection_string(conn_str=conn_str, share_name="myshar
 		https://tfstate686.file.core.windows.net/myshare/reverse_image_search_data/
 
 	azcopy copy 'data.txt' 'https://tfstate686.file.core.windows.net/myshare/reverse_image_search_data/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-09-18T08:33:39Z&st=2023-09-18T00:33:39Z&spr=https,http&sig=fJ7w2frsgEd696k%2BKV50QEuSbqDQlMyEYBLQ2xx40cY%3D' --recursive
+
+
+### creating a github self runner(eg):
+	$ mkdir actions-runner && cd actions-runner
+	$ curl -o actions-runner-linux-x64-2.309.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.309.0/actions-runner-linux-x64-2.309.0.tar.gz
+	$ echo "2974243bab2a282349ac833475d241d5273605d3628f0685bd07fb5530f9bb1a  actions-runner-linux-x64-2.309.0.tar.gz" | shasum -a 256 -c
+	$ tar xzf ./actions-runner-linux-x64-2.309.0.tar.gz
+	./config.sh --url https://github.com/shilu10/Reverse-image-search-data-collection --token token_value
+	$ ./run.sh
