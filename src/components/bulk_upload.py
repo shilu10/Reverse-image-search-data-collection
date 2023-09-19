@@ -95,25 +95,26 @@ class BulkUpload:
         print('[+]Started uploading the data to datastore.')
         all_dirs = os.listdir(self.data_path)
         
-        for indx, dir in all_dirs:
+        for indx, dir in enumerate(all_dirs):
             try:
                 dir_path = os.path.join(self.data_path, dir)
-                fileshare_directory_creator.create(dir)
+                self.fileshare_directory_creator.create(dir)
 
                 for file in os.listdir(dir_path):
+                    file_path = os.path.join(dir_path, file)
                     try:
-                        file_contents = open(file, 'rb')
-                        fileshare_file_uploader.upload(
+                        file_contents = open(file_path, 'rb')
+                        self.fileshare_file_uploader.upload(
                             directory_name=dir,
                             file_content=file_contents,
                             dst_file_name=file
                         )
 
                     except Exception as err:
-                        print(f'{file} is skipped')
+                        print(f'error: {err}, so file named {file} is skipped')
             
             except Exception as err:
-                print(f'{dir} is skipped')
+                print(f'error: {err}, so directory named {dir} is skipped')
 
         print('[+]Completed the uploading of data to datastore')
 
