@@ -124,11 +124,11 @@ def bulk_upload():
 
 
 @app.post("/bulk_upload/")
-def bulk_upload(label: str, files: UploadFile = List[UploadFile] = File(...)):
+def bulk_upload(label: str, files: List[UploadFile] = File(...)):
     skipped = []
     uploaded = []
     try:
-       collections = mongodb_client['labels']
+        collections = mongodb_client['labels']
         results = collections.find()
         documents = [document for document in results]
 
