@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import os, sys
 sys.path.append('..')
 from connectors.datastore import *
-from exceptionS.metastore import *
+from exceptions.metastore import *
 from typing import Dict
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob import PublicAccess
@@ -54,7 +54,15 @@ class BulkUpload:
             print("[+] started extracting the dataset") 
             if not os.path.exists(f'{self.extraction_path}/caltech-101'):
                 os.system(f"cd {self.extraction_path} && unzip -q caltech-101.zip")
-            print("[+] extraction of the dataset completed.")
+                print("[+] extraction of the dataset completed.")
+
+            else:
+                print(f"[+]{self.data_path} directory already exists, it is possible that data exists in datastore.")
+                client_res = input("Do you want to continue the process: yes or no: ")
+                assert client_res in ['yes', 'no'], "Invalid Response, response should be either 'yes' or 'no'"
+
+                if client_res == 'no':
+                    sys.exit()
 
         except Exception as err:
             print(err) 
@@ -111,16 +119,7 @@ class BulkUpload:
 
 
     def bulk_upload(self):
-        if  os.path.exists(self.data_path):
-            print(f"[+]{self.data_path} directory already exists, it is possible that data exists in datastore.")
-            client_res = input("Do you want to continue the process: yes or no: ")
-            assert client_res in ['yes', 'no'], "Invalid Response, response should be either 'yes' or 'no'"
-
-            if client_res=='yes':
-                self._bulk_upload_helper()
-
-        else:
-            self._bulk_upload_helper()
+       self._bulk_upload_helper()
 
     def run(self):
         print('[+]Started bulk upload process.')
