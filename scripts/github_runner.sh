@@ -13,6 +13,7 @@ if [ -d actions-runner ]
 then
     if [ -f actions-runner/run.sh ]
     then 
+        cd actions-runner
         ./config.sh --url $github_repo_link --token $token
 
     else
