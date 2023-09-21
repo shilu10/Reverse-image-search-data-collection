@@ -1,12 +1,17 @@
 from abc import ABC, abstractmethod
 import os, sys
+sys.path.append('..')
 from typing import Dict
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob import PublicAccess
 from azure.storage.blob import ContentSettings
 from azure.storage.fileshare import ShareClient
 from io import BufferedReader
+from logger import log_config
+import logging
 
+
+LOGGER = logging.getLogger(__main__)
 
 class DataStoreConnector(ABC): 
 	def __init__(self):
@@ -56,7 +61,8 @@ class AzureStorageConnector(DataStoreConnector):
 			return block_blob_service
 
 		except Exception as err:
-			return err 
+			LOGGER.error(f'Creation of Azure storage account connector failed. Reason: {err}')
+			raise  
 
 
 class AzureContainerCreator(CreateDirectory):
@@ -89,10 +95,11 @@ class AzureContainerCreator(CreateDirectory):
 		 		self.__blob_client.set_container_acl(container_name, 
 		 											public_access=PublicAccess.Container)
 
-		 	return {'container_creation_response': creation_response}
+		 	return {'container_creation_response': True}
 
 		except Exception as err:
-			return err 
+			LOGGER.error(f'Creation of Blob Container Failed, Reason: {err}')
+			return {'container_creation_response': False} 
 
 
 class AzureBlobCreator(UploadData):
@@ -125,10 +132,11 @@ class AzureBlobCreator(UploadData):
 						file_path = file_path,
 					)
 
-			return {'response': True}
+			return {'blob_creation_response': True}
 
 		except Exception as err:
-			return err 
+			LOGGER.error(f'Uploading of file to blob storage failed., Reason: {err}')
+			return {'blob_creation_response': False}
 
 
 ### creating nfs share for storing training_data.
@@ -153,7 +161,8 @@ class AzureFileShareConnector(DataStoreConnector):
 			return share 
 
 		except Exception as err:
-			print(err) 
+			LOGGER.error(f'Creation of Azure File share creator failed. Reason: {err}')
+			raise 
 
 
 class AzureFileShareDirectoryCreator(CreateDirectory):
@@ -183,10 +192,11 @@ class AzureFileShareDirectoryCreator(CreateDirectory):
 			# create root direc(reverse_image_search_data)
 			creation_response = self.__share_client.create_directory(f"reverse_image_search_data/train/{directory_name}")
 
-			return {'container_creation_response': creation_response} 
+			return {'fileshare_directory_creation_response': True}
 
 		except Exception as err:
-			print(err) 
+			LOGGER.error(f'Creation of File Share Directory Failed, Reason: {err}')
+			return {'fileshare_directory_creation_response': False}
 
 
 class AzureFileShareFileUploader(UploadData):
@@ -220,10 +230,8 @@ class AzureFileShareFileUploader(UploadData):
 			#file_client = self.__share_client.get_file_client(f"{parent_dir}/{directory_name}/{dst_file_name}")
 			res = dir_client.upload_file(data=file_content, file_name=dst_file_name)
 
-			return {'response': True}
+			return {'fileshare_file_upload': True}
 
 		except Exception as err:
-			print(err)
-
-reverse_image_search_data
-dummy
+			LOGGER.error(f'Uploading of file to fileshare directory failed., Reason: {err}')
+			return {'fileshare_file_upload': False}

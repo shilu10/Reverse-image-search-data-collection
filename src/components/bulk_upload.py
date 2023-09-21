@@ -12,6 +12,11 @@ from io import BufferedReader
 import shutil
 import glob 
 from tqdm import tqdm
+from logger import log_config
+import logging
+
+
+LOGGER = logging.getLogger(__main__)
 
 
 class BulkUpload: 
@@ -44,8 +49,8 @@ class BulkUpload:
             print("[+] Completed downloading the dataset")
 
         except Exception as err:
-            print(err)
-            return 
+            LOGGER.error(f'Downloading of initial dataset from kaggle failed. Reason: {err}')
+            return {"Response": "Failed"}
 
     def _extract_initial_data(self):
         """
@@ -66,7 +71,7 @@ class BulkUpload:
                     sys.exit()
 
         except Exception as err:
-            print(err) 
+            LOGGER.error(f'Extraction of initial dataset downloaded from kaggle failed. Reason: {err}')
             return
 
     def _prepare_initial_data(self):
@@ -85,7 +90,7 @@ class BulkUpload:
             print('[+]Completed the preparation of the dataset')
         
         except Exception as err:
-            print(err)
+            LOGGER.error(f'Downloading of initial dataset from kaggle failed. Reason: {err}')
             return 
 
     def _bulk_upload_helper(self):
@@ -93,31 +98,35 @@ class BulkUpload:
         this method, used to upload the data to the datastore, using the 
         datastore connector.
         """
-        print('[+]Started uploading the data to datastore.')
-        all_dirs = os.listdir(self.data_path)
-        
-        for indx, dir in tqdm(enumerate(all_dirs), total=len(all_dirs)):
-            try:
-                dir_path = os.path.join(self.data_path, dir)
-                self.fileshare_directory_creator.create(dir)
-
-                for file in os.listdir(dir_path):
-                    file_path = os.path.join(dir_path, file)
-                    try:
-                        file_contents = open(file_path, 'rb')
-                        self.fileshare_file_uploader.upload(
-                            directory_name=dir,
-                            file_content=file_contents,
-                            dst_file_name=file
-                        )
-
-                    except Exception as err:
-                        print(f'error: {err}, so file named {file} is skipped')
+        try:
+            print('[+]Started uploading the data to datastore.')
+            all_dirs = os.listdir(self.data_path)
             
-            except Exception as err:
-                print(f'error: {err}, so directory named {dir} is skipped')
+            for indx, dir in tqdm(enumerate(all_dirs), total=len(all_dirs)):
+                try:
+                    dir_path = os.path.join(self.data_path, dir)
+                    self.fileshare_directory_creator.create(dir)
 
-        print('[+]Completed the uploading of data to datastore')
+                    for file in os.listdir(dir_path):
+                        file_path = os.path.join(dir_path, file)
+                        try:
+                            file_contents = open(file_path, 'rb')
+                            self.fileshare_file_uploader.upload(
+                                directory_name=dir,
+                                file_content=file_contents,
+                                dst_file_name=file
+                            )
+
+                        except Exception as err:
+                            LOGGER.error(f'error: {err}, so file named {file} is skipped')
+                
+                except Exception as err:
+                    LOGGER.error(f'error: {err}, so directory named {dir} is skipped.')
+
+            print('[+]Completed the uploading of data to datastore')
+
+        except Exception as err:
+            LOGGER.error(f'Uploading of data to fileshare failed. Reason: {err}')
 
 
     def bulk_upload(self):
