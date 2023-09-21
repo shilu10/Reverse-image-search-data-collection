@@ -7,6 +7,11 @@ from azure.storage.blob import ContentSettings
 from azure.storage.fileshare import ShareClient
 from io import BufferedReader
 import shutil
+from logger import log_config
+import logging
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 # abstract class (blueprint)
@@ -16,22 +21,42 @@ class DataStore(ABC):
 
     @abstractmethod
     def _download_data(self):
+        """
+        this is a abstract method inside a abstract class named DataStore, it 
+        won't contain a body(implementation logic.)
+        """
         pass 
 
     @abstractmethod
     def _extract_initial_data(self):
+        """
+        this is a abstract method inside a abstract class named DataStore, it 
+        won't contain a body(implementation logic.)
+        """
         pass 
 
     @abstractmethod
     def _prepare_initial_data(self):
+        """
+        this is a abstract method inside a abstract class named DataStore, it 
+        won't contain a body(implementation logic.)
+        """
         pass 
 
     @abstractmethod
     def _sync_initial_data(self):
+        """
+        this is a abstract method inside a abstract class named DataStore, it 
+        won't contain a body(implementation logic.)
+        """
         pass 
 
     @abstractmethod
     def run(self):
+        """
+        this is a abstract method inside a abstract class named DataStore, it 
+        won't contain a body(implementation logic.)
+        """
         pass 
 
 
@@ -63,30 +88,30 @@ class AzureFileShareDataStore(DataStore):
         the extraction path.
         """
         try: 
-            print("[+] Started downloading the dataset")
+            LOGGER.info(f"Started downloading the dataset from kaggle data namd {self.dataset_name}")
             if not os.path.exists(self.extraction_path):
                 os.mkdir(self.extraction_path)
 
             command = f"cd {self.extraction_path} && kaggle datasets download -d {self.dataset_name}"
             os.system(command) 
-            print("[+] Completed downloading the dataset")
+            LOGGER.info(f" Completed downloading the dataset from kaggle data namd {self.dataset_name}")
 
         except Exception as err:
-            print(err)
-            return 
+            LOGGER.error(f'Downloading of initial dataset from kaggle failed. Reason: {err}')
+            return {"Response": "Failed"}
 
     def _extract_initial_data(self):
         """
         this method, will extract the initial data, using gzip and tar.
         """
         try:
-            print("[+] started extracting the dataset") 
+            LOGGER.info("Started extracting the dataset, downloaded from kaggle.")
             if not os.path.exists(f'{self.extraction_path}/caltech-101'):
                 os.system(f"cd {self.extraction_path} && unzip -q caltech-101.zip")
-            print("[+] extraction of the dataset completed.")
+            LOGGER.info("Extraction of the dataset completed.")
 
         except Exception as err:
-            print(err) 
+            LOGGER.error(f'Extraction of initial dataset downloaded from kaggle failed. Reason: {err}')
             return
 
     def _prepare_initial_data(self):
@@ -95,17 +120,17 @@ class AzureFileShareDataStore(DataStore):
         unwanted classes, etc.
         """
         try:
-            print('[+]Started preparing the dataset.')
+            LOGGER.info("Started preparing the dataset.(Data Preparation)")
             classes = os.listdir(self.data_path)
             for _class in classes:
                 if _class in self.avoid:
                     dir_path = self.data_path + f'{_class}'
                     shutil.rmtree(dir_path)
 
-            print('[+]Completed the preparation of the dataset')
+            LOGGER.info("Completed the preparation of the dataset")
         
         except Exception as err:
-            print(err)
+            LOGGER.error(f'Downloading of initial dataset from kaggle failed. Reason: {err}')
             return 
         
     def _sync_initial_data(self):
@@ -114,27 +139,36 @@ class AzureFileShareDataStore(DataStore):
         (file_share azure).
         """
         try:
-            print('[+] Started the data sync') 
+            LOGGER.info("Started data sync to datastore using azcopy.")
             command = f"azcopy copy '{self.data_path}/*' '{os.environ['AZCOPY_URL']}' --recursive"
-            print(command)
             os.system(command)
-            print('[+] Completed the data sync to datastore')
-        
+            LOGGER.info("Completed the data sync to datastore using azcopy.")
+            return {"Process": "Success"}
+
         except Exception as err:
-            print(err)
+            LOGGER.info("There was a error during data sync using azcopy, Reason: {err}")
             return 
 
     def run(self):
         try:
+            LOGGER.info("Started initial data upload process to datatore in datastore_setup.py.")
             self._download_data()
             self._extract_initial_data()
             self._prepare_initial_data()
-            self._sync_initial_data()
-        
-        except Exception as err:
-            print(err)
-            return 
+            response = self._sync_initial_data()
+            if response:
+                LOGGER.info("Completed initial data upload process to datatore in bulk_upload.py.")
 
+            else:
+                LOGGER.info("Failed the process of initial data upload process to datatore in bulk_upload.py.")
+
+        except KeyboardInterrupt as err:
+            LOGGER.error(f'There is a manual cancellation of the process')
+            sys.exit()
+
+        except Exception as err:
+            LOGGER.error(f'Initial data upload process stopped, due to {err}')
+            sys.exit()
 
 if __name__ == '__main__':
     ds = AzureFileShareDataStore()

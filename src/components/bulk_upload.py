@@ -16,7 +16,7 @@ from logger import log_config
 import logging
 
 
-LOGGER = logging.getLogger(__main__)
+LOGGER = logging.getLogger(__name__)
 
 
 class BulkUpload: 
@@ -137,15 +137,19 @@ class BulkUpload:
 
     def run(self):
         try:
-            LOGGER.info("Started bulk upload process.")
+            LOGGER.info("Started bulk upload process in bulk_upload.py.")
             self._download_data()
             self._extract_initial_data()
             self._prepare_initial_data()
             self.bulk_upload()
-            LOGGER.info("Completed bulk upload process.")
+            LOGGER.info("Completed bulk upload process in bulk_upload.py.")
         
         except KeyboardInterrupt as err:
             LOGGER.error(f'There is a manual cancellation of the process')
+            sys.exit()
+
+        except Exception as err:
+            LOGGER.error(f'Initial data upload process stopped, due to {err}')
             sys.exit()
 
 

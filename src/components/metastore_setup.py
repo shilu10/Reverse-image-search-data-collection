@@ -1,8 +1,13 @@
 import os, sys 
 sys.path.append('..')
 from abc import abstractmethod, ABC
-from exceptions.metastore import CustomException
+from exceptions.metastore import CustomException, LabelPresentException
 from connectors.metastore import MongoDBConnector
+from logger import log_config
+import logging
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class MetaDataStore(ABC):
@@ -10,9 +15,17 @@ class MetaDataStore(ABC):
         pass 
 
     def register_labels(self):
+        """
+        this is an abstractmethod from the abstract class named MetaDataStore.
+        the implementation(body) of this method will be empty.
+        """
         pass 
 
     def run(self):
+        """
+        this is an abstractmethod from the abstract class named MetaDataStore.
+        the implementation(body) of this method will be empty.
+        """
         pass 
 
 
@@ -36,7 +49,7 @@ class MongoDBMetaDataStore(MetaDataStore):
         documents for each label.
         """
         try:
-            print('[+]Started Inerting the labels into meta datastore')
+            LOGGER.infor("Started Inerting the metadata(label details) into metadatastore")
             if not os.path.exists(self.data_path):
                 raise CustomException('No file or directory, is found in the path, try to run datastore_setup.py first', '') 
             
@@ -46,30 +59,47 @@ class MongoDBMetaDataStore(MetaDataStore):
             documents = [document for document in results]
             if len(documents) > 0:
                 documents = [doc.get('class_id') for doc in results]
-                if 1 in documents:
-                    raise CustomException('Labels already present in the metadata store', '')
+                if 0 in documents:
+                    raise LabelPresentException('Labels already present in the metadata store', '')
 
             else:
                 for class_id, class_name in enumerate(all_dirs):
-                    new_doc = {
-                        'class_id': class_id,
-                        'class_name': class_name
-                    }
+                    try:
+                        new_doc = {
+                            'class_id': class_id,
+                            'class_name': class_name
+                        }
 
-                    collections.insert_one(new_doc)
+                        collections.insert_one(new_doc)
 
-            print('[+]Completed inserting all labels into metadata store.')
+                    except Exception as err:
+                        LOGGER.error(f"Error during inserting label record to metadata sore, Reason: {err}")
+                        return 
+
+                return {"Process": "Success"}
+
+            LOGGER.infor("Completed inserting all labels into metadata store.")
+
+        except CustomException as err:
+            LOGGER.error(f"There is no file or directory named present in {data_path}, so try to run datastore_setup.py first")
+            return 
 
         except Exception as err:
-            print(err)
+            LOGGER.error(f"There is error during registering label details into meta datastore. Error: {err}")
+            return 
+
+        except LabelPresentException as err:
+            LOGGER.error("Label already present in the metadata store")
             return 
 
     def run(self):
         try:
-            self.register_labels()
+            response = self.register_labels()
+            if response:
+                LOGGER.info("inserting label details in metadata store is successfull.")
         
         except Exception as err:
-            return err
+            LOGGER.error("inserting label details in metadata store is Failed.")
             
 
 if __name__ == '__main__':

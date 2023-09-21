@@ -25,6 +25,10 @@ class DataBaseConnector(ABC):
 
     @abstractmethod
     def create_connector(self):
+        """
+        this is a abstract method, in the abstract class, which has a header, but 
+        no body.
+        """
         pass 
 
 # mongodb connector.
