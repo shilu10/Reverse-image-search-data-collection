@@ -40,13 +40,13 @@ class BulkUpload:
         the extraction path.
         """
         try: 
-            print("[+] Started downloading the dataset")
+            LOGGER.info(f"Started downloading the dataset from kaggle data namd {self.dataset_name}")
             if not os.path.exists(self.extraction_path):
                 os.mkdir(self.extraction_path)
 
             command = f"cd {self.extraction_path} && kaggle datasets download -d {self.dataset_name}"
             os.system(command) 
-            print("[+] Completed downloading the dataset")
+            LOGGER.info(f" Completed downloading the dataset from kaggle data namd {self.dataset_name}")
 
         except Exception as err:
             LOGGER.error(f'Downloading of initial dataset from kaggle failed. Reason: {err}')
@@ -57,18 +57,21 @@ class BulkUpload:
         this method, will extract the initial data, using gzip and tar.
         """
         try:
-            print("[+] started extracting the dataset") 
+            LOGGER.info("Started extracting the dataset, downloaded from kaggle.")
             if not os.path.exists(f'{self.extraction_path}/caltech-101'):
                 os.system(f"cd {self.extraction_path} && unzip -q caltech-101.zip")
-                print("[+] extraction of the dataset completed.")
+                LOGGER.info("Extraction of the dataset completed.")
 
             else:
-                print(f"[+]{self.data_path} directory already exists, it is possible that data exists in datastore.")
+                LOGGER.warning("{self.data_path} directory already exists, it is possible that data exists in datastore.")
                 client_res = input("Do you want to continue the process: yes or no: ")
                 assert client_res in ['yes', 'no'], "Invalid Response, response should be either 'yes' or 'no'"
 
                 if client_res == 'no':
+                    LOGGER.info("Client cancelled the current process, because of dataset may present in datastore")
                     sys.exit()
+
+                LOGGER.info("Client continue the current process, eventhough of dataset may present in datastore")
 
         except Exception as err:
             LOGGER.error(f'Extraction of initial dataset downloaded from kaggle failed. Reason: {err}')
@@ -80,14 +83,14 @@ class BulkUpload:
         unwanted classes, etc.
         """
         try:
-            print('[+]Started preparing the dataset.')
+            LOGGER.info("Started preparing the dataset.(Data Preparation)")
             classes = os.listdir(self.data_path)
             for _class in classes:
                 if _class in self.avoid:
                     dir_path = self.data_path + f'{_class}'
                     shutil.rmtree(dir_path)
 
-            print('[+]Completed the preparation of the dataset')
+            LOGGER.info("Completed the preparation of the dataset")
         
         except Exception as err:
             LOGGER.error(f'Downloading of initial dataset from kaggle failed. Reason: {err}')
@@ -99,7 +102,7 @@ class BulkUpload:
         datastore connector.
         """
         try:
-            print('[+]Started uploading the data to datastore.')
+            LOGGER.info("Started uploading the data to datastore.")
             all_dirs = os.listdir(self.data_path)
             
             for indx, dir in tqdm(enumerate(all_dirs), total=len(all_dirs)):
@@ -123,7 +126,7 @@ class BulkUpload:
                 except Exception as err:
                     LOGGER.error(f'error: {err}, so directory named {dir} is skipped.')
 
-            print('[+]Completed the uploading of data to datastore')
+            LOGGER.info("Completed the uploading of data to datastore")
 
         except Exception as err:
             LOGGER.error(f'Uploading of data to fileshare failed. Reason: {err}')
@@ -133,12 +136,17 @@ class BulkUpload:
        self._bulk_upload_helper()
 
     def run(self):
-        print('[+]Started bulk upload process.')
-        self._download_data()
-        self._extract_initial_data()
-        self._prepare_initial_data()
-        self.bulk_upload()
-        print('[+]Completed bulk upload process.')
+        try:
+            LOGGER.info("Started bulk upload process.")
+            self._download_data()
+            self._extract_initial_data()
+            self._prepare_initial_data()
+            self.bulk_upload()
+            LOGGER.info("Completed bulk upload process.")
+        
+        except KeyboardInterrupt as err:
+            LOGGER.error(f'There is a manual cancellation of the process')
+            sys.exit()
 
 
 if __name__ == '__main__':

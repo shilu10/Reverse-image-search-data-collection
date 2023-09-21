@@ -11,7 +11,7 @@ from logger import log_config
 import logging
 
 
-LOGGER = logging.getLogger(__main__)
+LOGGER = logging.getLogger(__name__)
 
 class DataStoreConnector(ABC): 
 	def __init__(self):
