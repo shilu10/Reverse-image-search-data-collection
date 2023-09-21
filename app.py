@@ -32,6 +32,9 @@ app = FastAPI(title="DataCollection-Server") ## instantitaing fastapi
 
 @app.get("/labels") ## fetching all labels from mongodb 
 def fetch_label():
+    """
+    
+    """
     try:
         global labels
         collections = mongodb_client['labels']
