@@ -175,6 +175,9 @@ class AzureFileShareConnector(DataStoreConnector):
 		acc_name(dtype: str): To which storage account, needed to be connected.
 	"""
 	def __init__(self):
+		"""
+		AzureFileShareConnector's Constructor.
+		"""
 		pass 
 
 	def connect(self, share_name: str)->ShareClient:

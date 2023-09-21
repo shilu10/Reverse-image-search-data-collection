@@ -42,6 +42,9 @@ class MongoDBConnector(DataBaseConnector):
     and to the mongofb  
     """
     def __init__(self):
+        """
+        MongoDBConnector's Constructor.
+        """
         pass 
 
     def create_connector(self, db_name: str):
