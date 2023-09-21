@@ -41,7 +41,7 @@ share = ShareClient.from_connection_string(conn_str=conn_str, share_name="myshar
 			
 		https://tfstate686.file.core.windows.net/myshare/reverse_image_search_data/
 
-	azcopy copy 'data.txt' 'https://tfstate686.file.core.windows.net/myshare/reverse_image_search_data/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-09-18T08:33:39Z&st=2023-09-18T00:33:39Z&spr=https,http&sig=fJ7w2frsgEd696k%2BKV50QEuSbqDQlMyEYBLQ2xx40cY%3D' --recursive
+	azcopy copy 'data.txt' 'https://tfstate686.file.core.windows.net/myshare/reverse_image_search_data/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-09-21T09:45:31Z&st=2023-09-21T01:45:31Z&spr=https&sig=WoyZ%2BpZNKBoFhZcJDtl0S%2FWuCusXZIs2mk%2BHt3FfqpA%3D' --recursive
 
 
 ### creating a github self runner(eg):
