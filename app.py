@@ -33,7 +33,7 @@ app = FastAPI(title="DataCollection-Server") ## instantitaing fastapi
 @app.get("/labels") ## fetching all labels from mongodb 
 def fetch_label():
     """
-    
+    Fetches the labels from the MetaData Store.
     """
     try:
         global labels
@@ -50,7 +50,9 @@ def fetch_label():
 
 @app.post("/add_label/{label_name}") # adding new labels
 def add_label(label_name: str):
-
+    """
+    Adds a specified label to metadata store, and datastore.
+    """
     try:
         collections = mongodb_client['labels']
         results = collections.find()
@@ -84,12 +86,18 @@ def add_label(label_name: str):
 
 @app.get("/single_upload/") # upload single image 
 def single_upload():
+    """
+    Gives the single upload page.
+    """
     info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]}
     return JSONResponse(content=info, status_code=200, media_type=MEDIA_TYPE)
 
 
 @app.post("/single_upload/") # Image Single Upload Api
 async def single_upload(label: str, file: UploadFile = None):
+    """
+    Uploads the image file to the datastore.
+    """
     try:
         collections = mongodb_client['labels']
         results = collections.find()
@@ -120,12 +128,18 @@ async def single_upload(label: str, file: UploadFile = None):
 
 @app.get("/bulk_upload") # router for bulk upload page.(get method)
 def bulk_upload():
+    """
+    Gives the bulk upload page.
+    """
     info = {"Response": "Available", "Post-Request-Body": ["label", "Files"]}
     return JSONResponse(content=info, status_code=200, media_type=MEDIA_TYPE)
 
 
 @app.post("/bulk_upload/") # route for bulk upload page(post method)
 def bulk_upload(label: str, files: List[UploadFile] = File(...)):
+    """
+    Uploads the multiple image file to the datastore.
+    """
     skipped = []
     uploaded = []
     try:
