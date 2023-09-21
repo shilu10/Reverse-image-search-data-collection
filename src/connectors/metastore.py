@@ -21,6 +21,10 @@ class SingletonABCMeta(ABCMeta):
 class DataBaseConnector(ABC):
     __metaclass__ = SingletonABCMeta
     def __init__(self):
+        """
+        this constructor, is empty because of it is inside of the DataBaseConnector
+        Abstract class.
+        """
         pass 
 
     @abstractmethod

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 import os, sys
+sys.path.append('..')
+sys.path.append('../../')
 from typing import Dict
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob import PublicAccess
@@ -17,6 +19,10 @@ LOGGER = logging.getLogger(__name__)
 # abstract class (blueprint)
 class DataStore(ABC):
     def __init__(self):
+        """
+        this constructor, is empty because of it is inside of the DataStore
+        Abstract class.
+        """
         pass 
 
     @abstractmethod
@@ -146,7 +152,7 @@ class AzureFileShareDataStore(DataStore):
             return {"Process": "Success"}
 
         except Exception as err:
-            LOGGER.info("There was a error during data sync using azcopy, Reason: {err}")
+            LOGGER.error(f"There was a error during data sync using azcopy, Reason: {err}")
             return 
 
     def run(self):
@@ -157,13 +163,13 @@ class AzureFileShareDataStore(DataStore):
             self._prepare_initial_data()
             response = self._sync_initial_data()
             if response:
-                LOGGER.info("Completed initial data upload process to datatore in bulk_upload.py.")
+                LOGGER.info("Completed initial data upload process to datatore in datastore_setup.py.")
 
             else:
-                LOGGER.info("Failed the process of initial data upload process to datatore in bulk_upload.py.")
+                LOGGER.error("Failed the process of initial data upload process to datatore in datastore_setup.py.")
 
-        except KeyboardInterrupt as err:
-            LOGGER.error(f'There is a manual cancellation of the process')
+        except KeyboardInterrupt:
+            LOGGER.error('There is a manual cancellation of the process')
             sys.exit()
 
         except Exception as err:

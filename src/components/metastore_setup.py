@@ -12,6 +12,10 @@ LOGGER = logging.getLogger(__name__)
 
 class MetaDataStore(ABC):
     def __init__(self, *args, **kwargs):
+        """
+        this constructor, is empty because of it is inside of the MetaDataStore
+        Abstract class.
+        """
         pass 
 
     def register_labels(self):
@@ -99,7 +103,7 @@ class MongoDBMetaDataStore(MetaDataStore):
                 LOGGER.info("inserting label details in metadata store is successfull.")
         
         except Exception as err:
-            LOGGER.error("inserting label details in metadata store is Failed.")
+            LOGGER.error(f"inserting label details in metadata store is Failed. Reason: {err}")
             
 
 if __name__ == '__main__':

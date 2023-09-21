@@ -15,28 +15,52 @@ LOGGER = logging.getLogger(__name__)
 
 class DataStoreConnector(ABC): 
 	def __init__(self):
+		"""
+        this constructor, is empty because of it is inside of the DataStoreConnector
+        Abstract class.
+        """
 		pass 
 
 	@abstractmethod
 	def connect(self):
+		"""
+		this method implementation is empty, bcox this is abstract method, inside
+		a DataStoreConnector Abstract Class
+		"""
 		pass 
 
 
 class CreateDirectory(ABC):
 	def __init__(self):
+		"""
+		this constructor, is empty because of it is inside of the CreateDirectory
+    	Abstract class.
+		"""
 		pass 
 
 	@abstractmethod
 	def create(self):
+		"""
+		this method implementation is empty, bcox this is abstract method, inside
+		a CreateDirectory Abstract Class
+		"""
 		pass 
 
 
 class UploadData(ABC):
 	def __init__(self):
+		"""
+		this constructor, is empty because of it is inside of the UploadData
+    	Abstract class.
+		"""
 		pass 
 
 	@abstractmethod
 	def upload(self):
+		"""
+		this method implementation is empty, bcox this is abstract method, inside
+		a UploadData Abstract Class
+		"""
 		pass 
 
 
@@ -190,7 +214,7 @@ class AzureFileShareDirectoryCreator(CreateDirectory):
 		"""
 		try:
 			# create root direc(reverse_image_search_data)
-			creation_response = self.__share_client.create_directory(f"reverse_image_search_data/train/{directory_name}")
+			self.__share_client.create_directory(f"reverse_image_search_data/train/{directory_name}")
 
 			return {'fileshare_directory_creation_response': True}
 
@@ -227,8 +251,7 @@ class AzureFileShareFileUploader(UploadData):
 			parent_dir = f"reverse_image_search_data/train/{directory_name}"
 			dir_client = self.__share_client.get_directory_client(parent_dir)
 
-			#file_client = self.__share_client.get_file_client(f"{parent_dir}/{directory_name}/{dst_file_name}")
-			res = dir_client.upload_file(data=file_content, file_name=dst_file_name)
+			dir_client.upload_file(data=file_content, file_name=dst_file_name)
 
 			return {'fileshare_file_upload': True}
 
