@@ -74,12 +74,13 @@ class AzureStorageConnector(DataStoreConnector):
 	attrs:
 		acc_name(dtype: str): To which storage account, needed to be connected.
 	"""
+	blob_
 	def __init__(self, acc_name: str):
 		self.acc_name = acc_name
 
 	def connect(self) -> BlockBlobService:
 		try:
-			block_blob_service = BlockBlobService(account_name=self.acc_name, 
+			block_blob_service = (account_name=self.acc_name, 
 												  account_key=os.environ['AZ_ACCOUNT_KEY'])
 
 			return block_blob_service

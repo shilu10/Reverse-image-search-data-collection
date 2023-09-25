@@ -158,6 +158,7 @@ class AzureFileShareDataStore(DataStore):
     def run(self):
         try:
             LOGGER.info("Started initial data upload process to datatore in datastore_setup.py.")
+            
             self._download_data()
             self._extract_initial_data()
             self._prepare_initial_data()
