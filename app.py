@@ -22,7 +22,7 @@ mongodb_client_creator = MongoDBConnector() # creation of mongodb client
 mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
 
 file_share_client_creator = AzureFileShareConnector() # file share client
-file_share_client = file_share_client_creator.connect('myshare')
+file_share_client = file_share_client_creator.connect('myshare1')
 
 directory_creator = AzureFileShareDirectoryCreator(file_share_client) # azurecontainer creator and blob creator
 file_uploader = AzureFileShareFileUploader(file_share_client)
@@ -44,7 +44,6 @@ def fetch_label():
         return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
 
     except Exception as e:
-        logger.
         raise e
 
 

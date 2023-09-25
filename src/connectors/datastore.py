@@ -7,7 +7,7 @@ from azure.storage.blob import PublicAccess
 from azure.storage.blob import ContentSettings
 from azure.storage.fileshare import ShareClient
 from io import BufferedReader
-from logger import log_config
+import ..logger
 import logging
 
 
@@ -74,14 +74,13 @@ class AzureStorageConnector(DataStoreConnector):
 	attrs:
 		acc_name(dtype: str): To which storage account, needed to be connected.
 	"""
-	blob_
+	#blob_
 	def __init__(self, acc_name: str):
 		self.acc_name = acc_name
 
 	def connect(self) -> BlockBlobService:
 		try:
-			block_blob_service = (account_name=self.acc_name, 
-												  account_key=os.environ['AZ_ACCOUNT_KEY'])
+			block_blob_service = BlockBlobService(account_name=self.acc_name, account_key=os.environ['AZ_ACCOUNT_KEY'])
 
 			return block_blob_service
 
@@ -185,7 +184,7 @@ class AzureFileShareConnector(DataStoreConnector):
 		try:
 			connection_string = os.environ['AZ_CONNECTION_STRING']
 			share = ShareClient.from_connection_string(connection_string, share_name)
-
+			LOGGER.error(f'Successfully created, the Azure File share creator')
 			return share 
 
 		except Exception as err:
@@ -219,7 +218,7 @@ class AzureFileShareDirectoryCreator(CreateDirectory):
 		try:
 			# create root direc(reverse_image_search_data)
 			self.__share_client.create_directory(f"reverse_image_search_data/train/{directory_name}")
-
+			LOGGER.info(f'Successfully created, the Azure File share Directory named: {directory_name}')
 			return {'fileshare_directory_creation_response': True}
 
 		except Exception as err:
@@ -256,6 +255,7 @@ class AzureFileShareFileUploader(UploadData):
 			dir_client = self.__share_client.get_directory_client(parent_dir)
 
 			dir_client.upload_file(data=file_content, file_name=dst_file_name)
+			LOGGER.info(f'Successfully uploaded, the file named: {file_name} to Azure File share Directory named: {directory_name}')
 
 			return {'fileshare_file_upload': True}
 

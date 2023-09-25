@@ -1,11 +1,12 @@
 from pymongo.mongo_client import MongoClient 
 from abc import ABC, abstractmethod, ABCMeta
 import os, sys 
-from logger import log_config
+sys.path.append('../')
+import logger
 import logging
 
 
-LOGGER = logging.getLogger(__main__)
+LOGGER = logging.getLogger(__name__)
 
 
 # singleton pattern.
@@ -55,9 +56,10 @@ class MongoDBConnector(DataBaseConnector):
             uri = f'mongodb+srv://{username}:{password}@cluster0.kyobhtc.mongodb.net/?retryWrites=true&w=majority'
             client = MongoClient(uri)
             client_db = client[db_name]
-
+            LOGGER.info(f'Sucessfully connected to the DataStore(MongoDB)')
             return client_db
 
         except Exception as err:
             LOGGER.error(f'Creation of MongoDB Connector failed, Reason: {err}')
             raise 
+

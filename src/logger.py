@@ -6,6 +6,8 @@ import os
 from datetime import datetime
 
 
+if not os.path.exists('logs'):
+    os.mkdir('logs')
 
 LOG_FILE_DIR = os.path.join(os.environ['HOME'], "Reverse-image-search-data-collection", "logs")
 LOG_FILE_NAME = f"{datetime.now().strftime('%m%d%Y__%H%M%S')}.log"
