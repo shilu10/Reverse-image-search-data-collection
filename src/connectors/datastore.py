@@ -7,7 +7,7 @@ from azure.storage.blob import PublicAccess
 from azure.storage.blob import ContentSettings
 from azure.storage.fileshare import ShareClient
 from io import BufferedReader
-import ..logger
+from ..logger import *
 import logging
 
 
@@ -77,10 +77,11 @@ class AzureStorageConnector(DataStoreConnector):
 	#blob_
 	def __init__(self, acc_name: str):
 		self.acc_name = acc_name
+		self.block_service_client = BlockBlobService
 
 	def connect(self) -> BlockBlobService:
 		try:
-			block_blob_service = BlockBlobService(account_name=self.acc_name, account_key=os.environ['AZ_ACCOUNT_KEY'])
+			block_blob_service = self.block_service_client(account_name=self.acc_name, account_key=os.environ['AZ_ACCOUNT_KEY'])
 
 			return block_blob_service
 
@@ -178,13 +179,13 @@ class AzureFileShareConnector(DataStoreConnector):
 		"""
 		AzureFileShareConnector's Constructor.
 		"""
-		pass 
+		self.share_client = ShareClient 
 
 	def connect(self, share_name: str)->ShareClient:
 		try:
 			connection_string = os.environ['AZ_CONNECTION_STRING']
-			share = ShareClient.from_connection_string(connection_string, share_name)
-			LOGGER.error(f'Successfully created, the Azure File share creator')
+			share = self.share_client.from_connection_string(connection_string, share_name)
+			LOGGER.info(f'Successfully created, the Azure File share creator')
 			return share 
 
 		except Exception as err:

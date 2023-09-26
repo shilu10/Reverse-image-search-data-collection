@@ -33,6 +33,8 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
                                                            request,
                                                            request_id
                                                            )
+
+        print(response, 'in dispatch')
         request_dict = await self._log_request(request)
         logging_dict["request"] = request_dict
         logging_dict["response"] = response_dict
@@ -104,7 +106,9 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
             """
 
             start_time = time.perf_counter()
+            print('execution started')
             response = await self._execute_request(call_next, request, request_id)
+            print('execution completed')
             finish_time = time.perf_counter()
 
             overall_status = "successful" if response.status_code < 400 else "failed"
@@ -145,7 +149,10 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
                 - response: Response
             """
             try:
+                print('start request in exe')
                 response: Response = await call_next(request)
+                print('com request')
+
 
                 # Kickback X-Request-ID
                 response.headers["X-API-Request-ID"] = request_id

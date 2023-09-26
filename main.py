@@ -18,19 +18,17 @@ logging_config = {
         }
     },
     "handlers": {
-        "filehandler": {
+        "console": {
             "level": "DEBUG",
-            "class": "logging.FileHandler",
+            "class": "logging.StreamHandler",
             "formatter": "json",
-            "filename": "api_req_res.log",
-            "mode": "a",
-            
+            "stream": sys.stderr,
         }
     },
     "root": {
         "level": "DEBUG",
         "handlers": [
-            "filehandler"
+            "console"
         ],
         "propagate": True
     }
@@ -72,4 +70,4 @@ def root():
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="localhost", port=8080)
