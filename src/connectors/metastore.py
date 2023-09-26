@@ -2,7 +2,7 @@ from pymongo.mongo_client import MongoClient
 from abc import ABC, abstractmethod, ABCMeta
 import os, sys 
 sys.path.append('../')
-import logger
+from ..logger import * 
 import logging
 
 
@@ -46,7 +46,7 @@ class MongoDBConnector(DataBaseConnector):
         """
         MongoDBConnector's Constructor.
         """
-        pass 
+        self.mongo_client = MongoClient 
 
     def create_connector(self, db_name: str):
         try:
@@ -54,7 +54,7 @@ class MongoDBConnector(DataBaseConnector):
             password = os.environ['MONGO_PASSWORD']
 
             uri = f'mongodb+srv://{username}:{password}@cluster0.kyobhtc.mongodb.net/?retryWrites=true&w=majority'
-            client = MongoClient(uri)
+            client = self.mongo_client(uri)
             client_db = client[db_name]
             LOGGER.info(f'Sucessfully connected to the DataStore(MongoDB)')
             return client_db

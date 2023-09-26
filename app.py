@@ -2,21 +2,14 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from typing import List, Union, Any
 import uvicorn, os, sys, datetime
-from src.logger import GetLogger
+import logging
+from logging_lib import RouterLoggingMiddleware
 from src.connectors.metastore import MongoDBConnector
 from src.connectors.datastore import AzureBlobCreator, AzureContainerCreator, AzureStorageConnector, \
                              AzureFileShareConnector, AzureFileShareDirectoryCreator, AzureFileShareFileUploader
 
 
 MEDIA_TYPE = "application/json"
-
-
-LOG_FILE_DIR = os.path.join(os.getcwd(),"logs")
-LOG_FILE_NAME = f"{datetime.now().strftime('%m%d%Y__%H%M%S')}.log"
-LOG_FILE_PATH = os.path.join(LOG_FILE_DIR, LOG_FILE_NAME)
-
-logger_creator = GetLogger(LOG_FILE_PATH)
-logger = logger_creator.create_logger()
 
 mongodb_client_creator = MongoDBConnector() # creation of mongodb client
 mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
@@ -27,7 +20,19 @@ file_share_client = file_share_client_creator.connect('myshare1')
 directory_creator = AzureFileShareDirectoryCreator(file_share_client) # azurecontainer creator and blob creator
 file_uploader = AzureFileShareFileUploader(file_share_client)
 
-app = FastAPI(title="DataCollection-Server") ## instantitaing fastapi 
+
+# Define application
+def get_application() -> FastAPI:
+    app = FastAPI(title="DataCollection-Server", debug=True) ## instantitaing fastapi 
+
+    return app
+
+# Initialize application
+app = get_application()
+#app.add_middleware(
+ #   RouterLoggingMiddleware,
+  #  logger=logging.getLogger(__name__)
+#)
 
 
 @app.get("/labels") ## fetching all labels from mongodb 
@@ -41,6 +46,22 @@ def fetch_label():
         results = collections.find()
         documents = [document.get('class_name') for document in results]
         response = {"Status": "Success", "Response": {'labels': documents}}
+        return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
+
+    except Exception as e:
+        raise e
+
+@app.get("/label_count") ## fetching all labels from mongodb 
+def fetch_label():
+    """
+    Fetches the labels from the MetaData Store.
+    """
+    try:
+        global labels
+        collections = mongodb_client['labels']
+        results = collections.find()
+        documents = [document.get('class_name') for document in results]
+        response = {"Status": "Success", "Response": {'number of labels': len(documents)}}
         return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
 
     except Exception as e:
@@ -108,21 +129,37 @@ async def single_upload(label: str, file: UploadFile = None):
         #file_contents = open('image.jpeg', 'wb')
 
         if file.content_type == "image/jpeg" and is_label_present:
-            response = file_uploader.upload(
+            func_response = file_uploader.upload(
                 directory_name=label,
                 file_content=file_contents,
                 dst_file_name=file.filename
             )
-            return {"filename": file.filename, "label": label, "container-Response": response}
-        
-        else:
-            return {
+            response = {"filename": file.filename, "label": label, "container-Response": func_response}
+            return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
+
+        elif not file.content_type == "image/jpeg" and not is_label_present:
+            response =  {
                 "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
-                "LabelFound": label,
+                "LabelNotFound": f"Label named: {label} not found, Add new label using /add_label endpoint"
             }
 
+            return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
+        
+        elif not file.content_type == "image/jpeg":
+            response =  {
+                "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
+            }
+            return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
+
+        else:
+            response =  {
+                "LabelNotFound": f"Label named: {label} not found, Add new label using /add_label endpoint"
+            }
+            return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
+
     except Exception as err:
-         return {"ContentType": f"Content type should be Image/jpeg not {e}"}
+        response = {"ContentType": f"Content type should be Image/jpeg not {e}"}
+        return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
 
 
 @app.get("/bulk_upload") # router for bulk upload page.(get method)

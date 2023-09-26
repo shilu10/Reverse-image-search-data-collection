@@ -177,6 +177,7 @@ class AzureFileShareDataStore(DataStore):
             LOGGER.error(f'Initial data upload process stopped, due to {err}')
             sys.exit()
 
+
 if __name__ == '__main__':
     ds = AzureFileShareDataStore()
     ds.run()
