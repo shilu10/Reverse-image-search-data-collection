@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from typing import List, Union, Any
 import uvicorn, os, sys, datetime
 import logging
@@ -21,18 +21,19 @@ directory_creator = AzureFileShareDirectoryCreator(file_share_client) # azurecon
 file_uploader = AzureFileShareFileUploader(file_share_client)
 
 
-# Define application
-def get_application() -> FastAPI:
+def get_application() -> FastAPI: # Define application
     app = FastAPI(title="DataCollection-Server", debug=True) ## instantitaing fastapi 
 
     return app
 
-# Initialize application
-app = get_application()
-#app.add_middleware(
- #   RouterLoggingMiddleware,
-  #  logger=logging.getLogger(__name__)
-#)
+app = get_application() # Initialize application
+
+@app.get("/") ## fetching all labels from mongodb 
+def home():
+    """
+    Takes us directly to the /docs route.
+    """
+    return RedirectResponse(url="/docs", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/labels") ## fetching all labels from mongodb 
@@ -41,7 +42,7 @@ def fetch_label():
     Fetches the labels from the MetaData Store.
     """
     try:
-        global labels
+        #global labels
         collections = mongodb_client['labels']
         results = collections.find()
         documents = [document.get('class_name') for document in results]
@@ -50,6 +51,7 @@ def fetch_label():
 
     except Exception as e:
         raise e
+        
 
 @app.get("/label_count") ## fetching all labels from mongodb 
 def fetch_label():
@@ -57,7 +59,7 @@ def fetch_label():
     Fetches the labels from the MetaData Store.
     """
     try:
-        global labels
+        #global labels
         collections = mongodb_client['labels']
         results = collections.find()
         documents = [document.get('class_name') for document in results]
