@@ -56,7 +56,7 @@ class MongoDBConnector(DataBaseConnector):
             uri = f'mongodb+srv://{username}:{password}@cluster0.kyobhtc.mongodb.net/?retryWrites=true&w=majority'
             client = self.mongo_client(uri)
             client_db = client[db_name]
-            LOGGER.info(f'Sucessfully connected to the DataStore(MongoDB)')
+            LOGGER.info('Sucessfully connected to the DataStore(MongoDB)')
             return client_db
 
         except Exception as err:

@@ -185,7 +185,7 @@ class AzureFileShareConnector(DataStoreConnector):
 		try:
 			connection_string = os.environ['AZ_CONNECTION_STRING']
 			share = self.share_client.from_connection_string(connection_string, share_name)
-			LOGGER.info(f'Successfully created, the Azure File share creator')
+			LOGGER.info('Successfully created, the Azure File share connector')
 			return share 
 
 		except Exception as err:

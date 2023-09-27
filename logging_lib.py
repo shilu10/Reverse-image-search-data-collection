@@ -83,7 +83,7 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
             try:
                 body = await request.json()
                 request_logging["body"] = body
-            except:
+            except Exception:
                 body = None
 
             return request_logging
@@ -125,7 +125,7 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
 
             try:
                 resp_body = json.loads(resp_body[0].decode())
-            except:
+            except Exception:
                 resp_body = str(resp_body)
 
             response_logging["body"] = resp_body
