@@ -10,6 +10,7 @@ from src.connectors.datastore import AzureBlobCreator, AzureContainerCreator, Az
 
 
 MEDIA_TYPE = "application/json"
+IMAGE_CONTENT_TYPE = "image/jpeg"
 
 mongodb_client_creator = MongoDBConnector() # creation of mongodb client
 mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
@@ -42,16 +43,16 @@ def fetch_label():
     Fetches the labels from the MetaData Store.
     """
     try:
-        #global labels
         collections = mongodb_client['labels']
         results = collections.find()
         documents = [document.get('class_name') for document in results]
         response = {"Status": "Success", "Response": {'labels': documents}}
         return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
 
-    except Exception as e:
-        raise e
-        
+    except Exception:
+        info = {"Failed" :"Faild to fetch the labels"}
+        return JSONResponse(content=info, status_code=500, media_type=MEDIA_TYPE)
+
 
 @app.get("/label_count") ## fetching all labels from mongodb 
 def fetch_label():
@@ -59,15 +60,15 @@ def fetch_label():
     Fetches the labels from the MetaData Store.
     """
     try:
-        #global labels
         collections = mongodb_client['labels']
         results = collections.find()
         documents = [document.get('class_name') for document in results]
         response = {"Status": "Success", "Response": {'number of labels': len(documents)}}
         return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
 
-    except Exception as e:
-        raise e
+    except Exception:
+        info = {"Failed" :"Faild to fetch the label count"}
+        return JSONResponse(content=info, status_code=500, media_type=MEDIA_TYPE)
 
 
 @app.post("/add_label/{label_name}") # adding new labels
@@ -83,7 +84,7 @@ def add_label(label_name: str):
         class_names = [document.get('class_name') for document in documents]
         class_ids = [document.get('class_id') for document in documents]
 
-        if not label_name in class_names: 
+        if  label_name not in class_names: 
 
             next_id = 0 
             if len(class_ids) > 0:
@@ -97,13 +98,14 @@ def add_label(label_name: str):
 
             collections.insert_one(new_label_data)
 
-            container_response = directory_creator.create(directory_name=label_name)  # create a container named label_name
+            directory_creator.create(directory_name=label_name)  # create a container named label_name
 
         response = {"Status": "Success"}
         return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
 
-    except Exception as err:
-        return err 
+    except Exception:
+        response = {"Status": "Failed"}
+        return JSONResponse(content=response, status_code=500, media_type=MEDIA_TYPE)
 
 
 @app.get("/single_upload/") # upload single image 
@@ -128,9 +130,8 @@ async def single_upload(label: str, file: UploadFile = None):
         class_names = [document.get('class_name') for document in documents]
         is_label_present = label in class_names
         file_contents = file.file.read() 
-        #file_contents = open('image.jpeg', 'wb')
 
-        if file.content_type == "image/jpeg" and is_label_present:
+        if file.content_type == IMAGE_CONTENT_TYPE and is_label_present:
             func_response = file_uploader.upload(
                 directory_name=label,
                 file_content=file_contents,
@@ -139,7 +140,7 @@ async def single_upload(label: str, file: UploadFile = None):
             response = {"filename": file.filename, "label": label, "container-Response": func_response}
             return JSONResponse(content=response, status_code=200, media_type=MEDIA_TYPE)
 
-        elif not file.content_type == "image/jpeg" and not is_label_present:
+        elif not file.content_type == IMAGE_CONTENT_TYPE and not is_label_present:
             response =  {
                 "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
                 "LabelNotFound": f"Label named: {label} not found, Add new label using /add_label endpoint"
@@ -147,7 +148,7 @@ async def single_upload(label: str, file: UploadFile = None):
 
             return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
         
-        elif not file.content_type == "image/jpeg":
+        elif not file.content_type == IMAGE_CONTENT_TYPE:
             response =  {
                 "ContentType": f"Content type should be Image/jpeg not {file.content_type}",
             }
@@ -160,7 +161,7 @@ async def single_upload(label: str, file: UploadFile = None):
             return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
 
     except Exception as err:
-        response = {"ContentType": f"Content type should be Image/jpeg not {e}"}
+        response = {"ContentType": f"Content type should be Image/jpeg not {err}"}
         return JSONResponse(content=response, status_code=400, media_type=MEDIA_TYPE)
 
 
@@ -191,8 +192,8 @@ def bulk_upload(label: str, files: List[UploadFile] = File(...)):
         if label:
             for file in files:
                 file_contents = file.file.read() 
-                if file.content_type == "image/jpeg":
-                    response = file_uploader.upload(
+                if file.content_type == IMAGE_CONTENT_TYPE:
+                    file_uploader.upload(
                         directory_name=label,
                         file_content=file_contents,
                         dst_file_name=file.filename
@@ -217,7 +218,7 @@ def bulk_upload(label: str, files: List[UploadFile] = File(...)):
             }
 
     except Exception as err:
-         return {"ContentType": f"Content type should be Image/jpeg not {e}"}
+         return {"ContentType": f"Content type should be Image/jpeg not {err}"}
 
 
 if __name__ == '__main__':
