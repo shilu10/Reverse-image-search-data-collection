@@ -43,7 +43,12 @@ jobs:
         run: echo "Reformat code completed"
 
       - name: Running Unit Test
-        run: pytest
+        env: # Or as an environment variable
+          MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+          MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+          AZ_CONNECTION_STRING: ${{ secrets.AZ_CONNECTION_STRING }}
+          AZ_ACCOUNT_KEY: ${{ secrets.AZ_ACCOUNT_KEY }}
+        run: python3 -m pytest
 
   Packaging: 
     name: Package and Push to Docker HUB

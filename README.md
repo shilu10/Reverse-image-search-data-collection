@@ -10,9 +10,11 @@
 	# outputs a key, make it as a environment variable, it will be used by python api to create a container in azure.
 
 	environment variables we need,
-	MONGO_USERNAME 
-	MONGO_PASSWORD
-	AZ_ACCOUNT_KEY
+	MONGO_USERNAME  -> for metastore
+	MONGO_PASSWORD  -> for metastore
+	AZ_ACCOUNT_KEY  -> for blob store(datastore)
+	AZ_CONNECTION_STRING  -> for blob store(fileshare)
+	AZCOPY_URL   -> when using azcopy
 
 
 sas_token = generate_account_sas(
