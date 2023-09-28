@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   workflow_run:
     workflows: [Snyk, SonarQube, trivy]
-      types: [completed]
+    types: [completed]
 
 permissions:
   id-token: write
