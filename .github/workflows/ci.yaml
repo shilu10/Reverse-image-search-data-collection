@@ -33,6 +33,7 @@ jobs:
 
       - name: Install Test Dependencies
         run: pip3 install -r requirements.test.txt
+        run: pip3 install pylint
 
       - name: Lint code
         run: |
