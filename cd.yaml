@@ -1,0 +1,21 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  Preparation:
+    name: Deployment of Docker Container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Test Dependencies
+        run: pip3 install -r requirements.test.txt
