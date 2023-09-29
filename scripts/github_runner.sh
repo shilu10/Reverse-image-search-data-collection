@@ -13,6 +13,7 @@ if [ -d actions-runner ]
 then
     if [ -f actions-runner/run.sh ]
     then 
+        echo "running action-runner, already exist"
         cd actions-runner
         ./config.sh --url $github_repo_link --token $token
 
@@ -29,6 +30,7 @@ then
     fi
 
 else
+    echo "making new dir"
     mkdir actions-runner && cd actions-runner
     echo "created action-runner and cd to actions-runner"
     curl -o actions-runner-linux-x64-2.309.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.309.0/actions-runner-linux-x64-2.309.0.tar.gz
@@ -40,6 +42,7 @@ fi
 
 if [ $run_as_service == 'yes' ]
 then
+    echo "starting svc"
 	sudo bash svc.sh install
     sudo bash svc.sh start
 else
