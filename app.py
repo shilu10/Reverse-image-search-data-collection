@@ -19,7 +19,7 @@ mongodb_client_creator = MongoDBConnector() # creation of mongodb client
 mongodb_client = mongodb_client_creator.create_connector(db_name=DATABASE_NAME)
 
 file_share_client_creator = AzureFileShareConnector() # file share client
-file_share_client = file_share_client_creator.connect()
+file_share_client = file_share_client_creator.connect(FILE_SHARE_NAME)
 
 directory_creator = AzureFileShareDirectoryCreator(file_share_client) # azurecontainer creator and blob creator
 file_uploader = AzureFileShareFileUploader(file_share_client)
