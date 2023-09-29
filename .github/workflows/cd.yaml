@@ -40,7 +40,6 @@ jobs:
           -e MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
           -e MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
           -e AZ_CONNECTION_STRING=${{ secrets.AZ_CONNECTION_STRING }} \
-          -e AZ_ACCOUNT_KEY=${{ secrets.AZ_ACCOUNT_KEY }} \
           -e DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
           -e FILE_SHARE_NAME=${{ secrets.FILE_SHARE_NAME }} \
           -p 8080:8080 \
