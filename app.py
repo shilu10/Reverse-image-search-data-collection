@@ -11,12 +11,15 @@ from src.connectors.datastore import AzureBlobCreator, AzureContainerCreator, Az
 
 MEDIA_TYPE = "application/json"
 IMAGE_CONTENT_TYPE = "image/jpeg"
+DATABASE_NAME = os.environ['DATABASE_NAME']
+FILE_SHARE_NAME = os.environ['FILE_SHARE_NAME']
 
 mongodb_client_creator = MongoDBConnector() # creation of mongodb client
-mongodb_client = mongodb_client_creator.create_connector(db_name='ris_data_collection')
+
+mongodb_client = mongodb_client_creator.create_connector(db_name=DATABASE_NAME)
 
 file_share_client_creator = AzureFileShareConnector() # file share client
-file_share_client = file_share_client_creator.connect('myshare1')
+file_share_client = file_share_client_creator.connect()
 
 directory_creator = AzureFileShareDirectoryCreator(file_share_client) # azurecontainer creator and blob creator
 file_uploader = AzureFileShareFileUploader(file_share_client)
